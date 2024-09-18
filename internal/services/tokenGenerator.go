@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"log"
+	"time"
 
 	"github.com/odysseymorphey/SimpleAuth/internal/models"
 
@@ -18,6 +19,8 @@ func generateAccessToken(userIP string, userAgent string) (string, error) {
     token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
 		"ip": userIP,
 		"userAgent": userAgent,
+		"pairPass": pairID,  //TODO: Create a pairPass Generator
+		"exp": jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
 	})
 	
     return token.SignedString(secretKey)

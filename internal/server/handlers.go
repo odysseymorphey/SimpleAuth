@@ -5,10 +5,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/odysseymorphey/SimpleAuth/internal/models"
 	"github.com/odysseymorphey/SimpleAuth/internal/services"
 )
 
-func GenerateToken(w http.ResponseWriter, r *http.Request) {
+func (s *Server) GenerateToken(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -19,6 +20,8 @@ func GenerateToken(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusInternalServerError)
         return
     }
+
+	s.db.SaveRefreshToken(token_pair.(models.Tokens).RefreshToken)
 
 	w.Write([]byte(r.URL.Query().Get("GUID") + "\n"))
 
@@ -32,6 +35,18 @@ func GenerateToken(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func RefreshToken(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("REFRESH"))
+func (s *Server) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	var tokens models.Tokens
+
+	if err := json.NewDecoder(r.Body).Decode(&tokens); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	
 }

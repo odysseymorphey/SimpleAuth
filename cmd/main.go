@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,14 +11,20 @@ import (
 
 func main() {
 	s := server.NewServer()
-	s.Start()
 
 	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-        <-sig
-        s.Stop()
-        os.Exit(1)
-    }()
+		<-sig
+		s.Stop()
+		log.Println("Server stopped")
+		os.Exit(0)
+	}()
+
+	err := s.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

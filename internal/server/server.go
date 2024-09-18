@@ -31,12 +31,19 @@ func NewServer() *Server {
 }
 
 func (s *Server) Start() error {
-	s.router.HandleFunc("/token", GenerateToken)
-	s.router.HandleFunc("/refresh", RefreshToken)
+	s.router.HandleFunc("/token", s.GenerateToken)
+	s.router.HandleFunc("/refresh", s.RefreshToken)
 
-	return s.server.ListenAndServe()
+	err := s.server.ListenAndServe()
+	if err != nil {
+		return err
+	}
+
+	log.Println("Server started on port 8080")
+
+	return nil
 }
 
 func (s *Server) Stop() {
-	s.db.Close()
+	// s.db.Close()
 }
