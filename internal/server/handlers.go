@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -15,19 +16,18 @@ func (s *Server) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token_pair, rToken, err := services.GeneratePair(r.URL.Query().Get("GUID"), r.RemoteAddr, r.UserAgent())
+	tokenPair, err := services.GeneratePair(s.db, r.URL.Query().Get("GUID"), r.RemoteAddr, r.UserAgent())
 	if err != nil {
-        w.WriteHeader(http.StatusInternalServerError)
-        return
-    }
-
-	s.db.SaveRefreshToken(rToken)
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
 
 	w.Write([]byte(r.URL.Query().Get("GUID") + "\n"))
 
-    w.Header().Set("content-type", "application/json")
+	w.Header().Set("content-type", "application/json")
 
-	err = json.NewEncoder(w).Encode(token_pair)
+	err = json.NewEncoder(w).Encode(tokenPair)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println(err)
@@ -41,12 +41,15 @@ func (s *Server) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var tokens models.Tokens
+	tokenPair := &models.Pair{}
 
-	if err := json.NewDecoder(r.Body).Decode(&tokens); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&tokenPair); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	
+	services.RefreshAccessToken(s.db, r.URL.Query().Get("GUID"), tokenPair)
+
+	w.Write([]byte(fmt.Sprint(tokenPair)))
+
 }

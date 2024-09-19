@@ -1,13 +1,27 @@
 package models
 
-type Tokens struct {
+import "github.com/golang-jwt/jwt/v5"
+
+type Pair struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
 
-type RefreshToken struct {
-	GUID   string
-	UserIP string
-	Hash   string
-	PairID string
+type CustomClaims struct {
+	IP        string `json:"ip"`
+	UserAgent string `json:"userAgent"`
+	PairID    string `json:"pairID"`
+	jwt.RegisteredClaims
+}
+
+type DBRecord struct {
+	GUID      string
+	UserIP    string
+	TokenHash string
+	PairID    string
+}
+
+type ComparableData struct {
+	TokenHash string
+	PairID    string
 }

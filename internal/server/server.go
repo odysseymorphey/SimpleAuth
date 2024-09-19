@@ -45,5 +45,5 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) Stop() {
-	// s.db.Close()
+	s.db.Close()
 }

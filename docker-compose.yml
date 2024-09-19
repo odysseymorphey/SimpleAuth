@@ -24,6 +24,8 @@ services:
       - postgres
     environment:
       DB_URL: postgres://postgres:mysecretpassword@postgres:5432/postgres
+    ports:
+      - "8080:8080"
     networks:
       - app-network
 

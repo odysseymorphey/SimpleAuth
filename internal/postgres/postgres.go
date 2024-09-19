@@ -10,25 +10,63 @@ import (
 )
 
 type DB struct {
-    conn *pgx.Conn
+	conn *pgx.Conn
 }
 
 func NewConnection() (*DB, error) {
-    conn, err := pgx.Connect(context.Background(), os.Getenv("DB_URL"))
+	conn, err := pgx.Connect(context.Background(), os.Getenv("DB_URL"))
 	if err != nil {
 		return nil, err
 	}
 	log.Println("Postgres connected to localhost:5432/postgres")
-	
+
 	return &DB{
-        conn: conn,
-    }, nil
+		conn: conn,
+	}, nil
 }
 
 func (d *DB) Close() {
-    d.conn.Close(context.Background())
+	d.conn.Close(context.Background())
 }
 
-func (d *DB) SaveRefreshToken(*models.RefreshToken) error {
-    return nil
+func (d *DB) SaveRefreshToken(refreshToken *models.DBRecord) error {
+	query := `
+        INSERT INTO refresh_tokens (guid, user_ip, hash, pair_id)
+        VALUES ($1, $2, $3, $4)
+    `
+	_, err := d.conn.Exec(context.Background(), query, refreshToken.GUID, refreshToken.UserIP, refreshToken.TokenHash, refreshToken.PairID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DB) UpdateRefreshToken(guid string, refreshToken *models.ComparableData) error {
+	query := `
+        UPDATE refresh_tokens
+        SET hash = $1, pair_id = $2 WHERE guid = $3
+    `
+	_, err := d.conn.Exec(context.Background(), query, refreshToken.TokenHash, refreshToken.PairID, guid)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DB) GetDataForCompare(guid string) (*models.ComparableData, error) {
+	query := `
+        SELECT hash, pair_id FROM refresh_tokens WHERE guid = $1
+    `
+	row := d.conn.QueryRow(context.Background(), query, guid)
+
+	data := &models.ComparableData{}
+
+	err := row.Scan(data.TokenHash, data.PairID)
+	if err != nil {
+		return nil, err
+	}
+
+    return data, nil
 }
