@@ -6,8 +6,8 @@ type Tokens struct {
 }
 
 type RefreshToken struct {
-	GUID     string
-	UserIP   string
-	Hash     string
-	PairPass string
+	GUID   string
+	UserIP string
+	Hash   string
+	PairID string
 }

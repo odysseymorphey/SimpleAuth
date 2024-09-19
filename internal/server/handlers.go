@@ -15,13 +15,13 @@ func (s *Server) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token_pair, err := services.GeneratePair(r.RemoteAddr, r.UserAgent())
+	token_pair, rToken, err := services.GeneratePair(r.URL.Query().Get("GUID"), r.RemoteAddr, r.UserAgent())
 	if err != nil {
         w.WriteHeader(http.StatusInternalServerError)
         return
     }
 
-	s.db.SaveRefreshToken(token_pair.(models.Tokens).RefreshToken)
+	s.db.SaveRefreshToken(rToken)
 
 	w.Write([]byte(r.URL.Query().Get("GUID") + "\n"))
 

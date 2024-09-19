@@ -3,8 +3,10 @@ package postgres
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/odysseymorphey/SimpleAuth/internal/models"
 )
 
 type DB struct {
@@ -12,7 +14,7 @@ type DB struct {
 }
 
 func NewConnection() (*DB, error) {
-    conn, err := pgx.Connect(context.Background(), "postgres://postgres:mysecretpassword@localhost:5432/postgres")
+    conn, err := pgx.Connect(context.Background(), os.Getenv("DB_URL"))
 	if err != nil {
 		return nil, err
 	}
@@ -27,11 +29,6 @@ func (d *DB) Close() {
     d.conn.Close(context.Background())
 }
 
-func (d *DB) SaveRefreshToken(token string) error {
-    _, err := d.conn.Exec(context.Background(), "INSERT INTO refresh_tokens (token) VALUES ($1)", token)
-    if err != nil {
-        return err
-    }
-	
+func (d *DB) SaveRefreshToken(*models.RefreshToken) error {
     return nil
 }
