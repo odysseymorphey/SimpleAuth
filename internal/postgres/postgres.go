@@ -31,7 +31,7 @@ func (d *DB) Close() {
 
 func (d *DB) SaveRefreshToken(refreshToken *models.DBRecord) error {
 	query := `
-        INSERT INTO refresh_tokens (guid, user_ip, hash, pair_id)
+        INSERT INTO refresh_tokens (guid, user_ip, hashed_token, pair_id)
         VALUES ($1, $2, $3, $4)
     `
 	_, err := d.conn.Exec(context.Background(), query, refreshToken.GUID, refreshToken.UserIP, refreshToken.TokenHash, refreshToken.PairID)
@@ -45,7 +45,7 @@ func (d *DB) SaveRefreshToken(refreshToken *models.DBRecord) error {
 func (d *DB) UpdateRefreshToken(guid string, refreshToken *models.ComparableData) error {
 	query := `
         UPDATE refresh_tokens
-        SET hash = $1, pair_id = $2 WHERE guid = $3
+        SET hashed_token = $1, pair_id = $2 WHERE guid = $3
     `
 	_, err := d.conn.Exec(context.Background(), query, refreshToken.TokenHash, refreshToken.PairID, guid)
 	if err != nil {
@@ -57,16 +57,15 @@ func (d *DB) UpdateRefreshToken(guid string, refreshToken *models.ComparableData
 
 func (d *DB) GetDataForCompare(guid string) (*models.ComparableData, error) {
 	query := `
-        SELECT hash, pair_id FROM refresh_tokens WHERE guid = $1
+        SELECT hashed_token, pair_id, user_ip FROM refresh_tokens WHERE guid = $1
     `
 	row := d.conn.QueryRow(context.Background(), query, guid)
 
-	data := &models.ComparableData{}
-
-	err := row.Scan(data.TokenHash, data.PairID)
+	var data models.ComparableData
+	err := row.Scan(&data.TokenHash, &data.PairID, &data.UserIP)
 	if err != nil {
 		return nil, err
 	}
 
-    return data, nil
+	return &data, nil
 }

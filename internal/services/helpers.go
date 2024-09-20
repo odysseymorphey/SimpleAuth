@@ -58,3 +58,16 @@ func generateRefreshToken() (string, error) {
 
 	return base64.URLEncoding.EncodeToString(token), nil
 }
+
+func parseToken(tokenString string) (*models.CustomClaims, error) {
+	parser := jwt.NewParser(jwt.WithoutClaimsValidation())
+
+	token, _, err := parser.ParseUnverified(tokenString, &models.CustomClaims{})
+	if err != nil {
+		return nil, err
+	}
+
+	claims := token.Claims.(*models.CustomClaims)
+
+	return claims, nil
+}

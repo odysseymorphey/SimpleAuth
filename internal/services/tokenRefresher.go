@@ -1,31 +1,39 @@
 package services
 
 import (
+	"fmt"
 	"log"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/odysseymorphey/SimpleAuth/internal/models"
 	"github.com/odysseymorphey/SimpleAuth/internal/postgres"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func RefreshAccessToken(db *postgres.DB, uInfo *models.UserInfo , tokenPair *models.Pair) (*models.Pair, error) {
-	data, err := db.GetDataForCompare(uInfo.GUID)
+	userData, err := db.GetDataForCompare(uInfo.GUID)
 	if err != nil {
+		log.Println("Error getting data for compare: ", err)
 		return nil, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(data.TokenHash), []byte(tokenPair.RefreshToken))
+	err = bcrypt.CompareHashAndPassword([]byte(userData.TokenHash), []byte(tokenPair.RefreshToken))
 	if err != nil {
+		log.Println("Error comparing hash: ", err)
 		return nil, err
 	}
 
-	token, err := jwt.ParseWithClaims(tokenPair.AccessToken, &models.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
-
-	if token.Claims.(*models.CustomClaims).PairID != data.PairID {
+	claims, err := parseToken(tokenPair.AccessToken)
+	if err != nil {
+		log.Println("Error parsing token: ", err)
 		return nil, err
+	}
+
+	if claims.PairID != userData.PairID {
+		return nil, fmt.Errorf("error: wrong pair ID")
+	}
+
+	if claims.IP != userData.UserIP {
+		sendEmailNotification();
 	}
 
 	pairID, err := GeneratePairID()
@@ -52,9 +60,9 @@ func RefreshAccessToken(db *postgres.DB, uInfo *models.UserInfo , tokenPair *mod
 		return nil, err
 	}
 
-	data = &models.ComparableData{
+	data := &models.ComparableData{
 		TokenHash: hashedToken,
-		PairID:    data.PairID,
+		PairID:    pairID,
 	}
 
 	err = db.UpdateRefreshToken(uInfo.GUID, data)

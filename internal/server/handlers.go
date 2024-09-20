@@ -29,8 +29,6 @@ func (s *Server) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(r.URL.Query().Get("GUID") + "\n"))
-
 	w.Header().Set("content-type", "application/json")
 
 	err = json.NewEncoder(w).Encode(tokenPair)
@@ -60,8 +58,20 @@ func (s *Server) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		UserAgent: r.UserAgent(),
 	}
 
-	services.RefreshAccessToken(s.db, uInfo, tokenPair)
+	newPair, err := services.RefreshAccessToken(s.db, uInfo, tokenPair)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintln(err)))
+		log.Println(err)
+		return
+	}
 
-	w.Write([]byte(fmt.Sprint(tokenPair)))
+	w.Header().Set("content-type", "application/json")
 
+	err = json.NewEncoder(w).Encode(newPair)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
 }

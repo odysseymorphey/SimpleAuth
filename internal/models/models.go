@@ -3,7 +3,7 @@ package models
 import "github.com/golang-jwt/jwt/v5"
 
 type UserInfo struct {
-	GUID    string
+	GUID      string
 	UserIP    string
 	UserAgent string
 }
@@ -30,4 +30,5 @@ type DBRecord struct {
 type ComparableData struct {
 	TokenHash string
 	PairID    string
+	UserIP    string
 }
