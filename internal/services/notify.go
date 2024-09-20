@@ -2,6 +2,6 @@ package services
 
 import "log"
 
-func sendEmailNotification() {
-	log.Println("Email notification sent")
+func sendEmailNotification(email string) {
+	log.Println("Email notification sent to: ", email)
 }

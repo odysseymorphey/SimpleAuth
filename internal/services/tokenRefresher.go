@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func RefreshAccessToken(db *postgres.DB, uInfo *models.UserInfo , tokenPair *models.Pair) (*models.Pair, error) {
+func RefreshAccessToken(db *postgres.DB, uInfo *models.UserInfo, tokenPair *models.Pair) (*models.Pair, error) {
 	userData, err := db.GetDataForCompare(uInfo.GUID)
 	if err != nil {
 		log.Println("Error getting data for compare: ", err)
@@ -33,7 +33,8 @@ func RefreshAccessToken(db *postgres.DB, uInfo *models.UserInfo , tokenPair *mod
 	}
 
 	if claims.IP != userData.UserIP {
-		sendEmailNotification();
+		email, _ := db.GetUserEmailMock(uInfo.GUID)
+		sendEmailNotification(email)
 	}
 
 	pairID, err := GeneratePairID()

@@ -17,8 +17,8 @@ func (s *Server) GenerateToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uInfo := &models.UserInfo{
-		GUID:     r.URL.Query().Get("GUID"),
-		UserIP:   r.RemoteAddr,
+		GUID:      r.URL.Query().Get("GUID"),
+		UserIP:    r.RemoteAddr,
 		UserAgent: r.UserAgent(),
 	}
 

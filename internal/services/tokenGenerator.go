@@ -5,7 +5,6 @@ import (
 
 	"github.com/odysseymorphey/SimpleAuth/internal/models"
 	"github.com/odysseymorphey/SimpleAuth/internal/postgres"
-
 )
 
 func GeneratePair(db *postgres.DB, uInfo *models.UserInfo) (*models.Pair, error) {
@@ -39,9 +38,9 @@ func GeneratePair(db *postgres.DB, uInfo *models.UserInfo) (*models.Pair, error)
 		TokenHash: hashedToken,
 		PairID:    pairID,
 	}
-	
+
 	db.SaveRefreshToken(rToken)
-	
+
 	pair := &models.Pair{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,

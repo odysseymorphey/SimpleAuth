@@ -10,7 +10,7 @@ import (
 type Server struct {
 	router *http.ServeMux
 	server *http.Server
-	db *postgres.DB
+	db     *postgres.DB
 }
 
 func NewServer() *Server {

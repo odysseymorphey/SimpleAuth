@@ -69,3 +69,7 @@ func (d *DB) GetDataForCompare(guid string) (*models.ComparableData, error) {
 
 	return &data, nil
 }
+
+func (d *DB) GetUserEmailMock(guid string) (string, error) {
+	return "gorillamango@gmail.com", nil
+}
