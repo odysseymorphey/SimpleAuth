@@ -16,6 +16,12 @@ func (s *Server) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Query().Get("GUID") == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("GUID is empty")
+		return
+	}
+
 	uInfo := &models.UserInfo{
 		GUID:      r.URL.Query().Get("GUID"),
 		UserIP:    r.RemoteAddr,
@@ -42,6 +48,12 @@ func (s *Server) GenerateToken(w http.ResponseWriter, r *http.Request) {
 func (s *Server) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	if r.URL.Query().Get("GUID") == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("GUID is empty")
 		return
 	}
 
