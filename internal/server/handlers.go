@@ -16,7 +16,13 @@ func (s *Server) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenPair, err := services.GeneratePair(s.db, r.URL.Query().Get("GUID"), r.RemoteAddr, r.UserAgent())
+	uInfo := &models.UserInfo{
+		GUID:     r.URL.Query().Get("GUID"),
+		UserIP:   r.RemoteAddr,
+		UserAgent: r.UserAgent(),
+	}
+
+	tokenPair, err := services.GeneratePair(s.db, uInfo)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println(err)
@@ -48,7 +54,13 @@ func (s *Server) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	services.RefreshAccessToken(s.db, r.URL.Query().Get("GUID"), tokenPair)
+	uInfo := &models.UserInfo{
+		GUID:      r.URL.Query().Get("GUID"),
+		UserIP:    r.RemoteAddr,
+		UserAgent: r.UserAgent(),
+	}
+
+	services.RefreshAccessToken(s.db, uInfo, tokenPair)
 
 	w.Write([]byte(fmt.Sprint(tokenPair)))
 

@@ -2,6 +2,12 @@ package models
 
 import "github.com/golang-jwt/jwt/v5"
 
+type UserInfo struct {
+	GUID    string
+	UserIP    string
+	UserAgent string
+}
+
 type Pair struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`

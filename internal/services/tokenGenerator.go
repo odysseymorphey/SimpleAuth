@@ -8,14 +8,14 @@ import (
 
 )
 
-func GeneratePair(db *postgres.DB, userID string, userIP string, userAgent string) (*models.Pair, error) {
+func GeneratePair(db *postgres.DB, uInfo *models.UserInfo) (*models.Pair, error) {
 	pairID, err := GeneratePairID()
 	if err != nil {
 		log.Println("Error generating pair ID: ", err)
 		return nil, err
 	}
 
-	accessToken, err := generateAccessToken(userIP, userAgent, pairID)
+	accessToken, err := generateAccessToken(uInfo.UserIP, uInfo.UserAgent, pairID)
 	if err != nil {
 		log.Println("Error generating access token: ", err)
 		return nil, err
@@ -27,11 +27,6 @@ func GeneratePair(db *postgres.DB, userID string, userIP string, userAgent strin
 		return nil, err
 	}
 
-	pair := &models.Pair{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}
-
 	hashedToken, err := generateBCrypt(refreshToken)
 	if err != nil {
 		log.Println("Error hashing refresh token: ", err)
@@ -39,13 +34,18 @@ func GeneratePair(db *postgres.DB, userID string, userIP string, userAgent strin
 	}
 
 	rToken := &models.DBRecord{
-		GUID:      userID,
-		UserIP:    userIP,
+		GUID:      uInfo.GUID,
+		UserIP:    uInfo.UserIP,
 		TokenHash: hashedToken,
 		PairID:    pairID,
 	}
 	
 	db.SaveRefreshToken(rToken)
+	
+	pair := &models.Pair{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
 
 	return pair, nil
 }
