@@ -2,14 +2,14 @@ package services
 
 import (
 	"fmt"
+	"github.com/odysseymorphey/SimpleAuth/internal/repository"
 	"log"
 
 	"github.com/odysseymorphey/SimpleAuth/internal/models"
-	"github.com/odysseymorphey/SimpleAuth/internal/postgres"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func RefreshAccessToken(db *postgres.DB, uInfo *models.UserInfo, tokenPair *models.Pair) (*models.Pair, error) {
+func RefreshAccessToken(db repository.Repository, uInfo *models.UserInfo, tokenPair *models.Pair) (*models.Pair, error) {
 	userData, err := db.GetDataForCompare(uInfo.GUID)
 	if err != nil {
 		log.Println("Error getting data for compare: ", err)
@@ -43,7 +43,7 @@ func RefreshAccessToken(db *postgres.DB, uInfo *models.UserInfo, tokenPair *mode
 		return nil, err
 	}
 
-	accessToken, err := generateAccessToken(uInfo.UserIP, uInfo.UserAgent, pairID)
+	accessToken, err := generateAccessToken(uInfo, pairID)
 	if err != nil {
 		log.Println("Error generating access token: ", err)
 		return nil, err

@@ -13,7 +13,7 @@ type DB struct {
 	conn *pgx.Conn
 }
 
-func NewConnection() (*DB, error) {
+func NewConnection(dsn string) (*DB, error) {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DB_URL"))
 	if err != nil {
 		return nil, err

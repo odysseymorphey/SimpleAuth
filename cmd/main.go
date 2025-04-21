@@ -1,30 +1,25 @@
 package main
 
 import (
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-
+	"fmt"
 	"github.com/odysseymorphey/SimpleAuth/internal/server"
+	"github.com/odysseymorphey/SimpleAuth/storage/postgres"
+	"github.com/sirupsen/logrus"
+	"os"
 )
 
 func main() {
-	s := server.NewServer()
-
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
-
-	go func() {
-		<-sig
-		s.Stop()
-		log.Println("Server stopped")
-		os.Exit(0)
-	}()
-
-	err := s.Start()
+	db, err := postgres.NewConnection(fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("POSTGRES_HOST"),
+		os.Getenv("POSTGRES_PORT"),
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_DB")))
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatalf("Cannot connect to db: %v", err)
 	}
 
+	s := server.NewServer(db)
+
+	s.Start()
 }

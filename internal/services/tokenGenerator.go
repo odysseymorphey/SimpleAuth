@@ -1,20 +1,20 @@
 package services
 
 import (
+	"github.com/odysseymorphey/SimpleAuth/internal/repository"
 	"log"
 
 	"github.com/odysseymorphey/SimpleAuth/internal/models"
-	"github.com/odysseymorphey/SimpleAuth/internal/postgres"
 )
 
-func GeneratePair(db *postgres.DB, uInfo *models.UserInfo) (*models.Pair, error) {
+func GeneratePair(db repository.Repository, uInfo *models.UserInfo) (*models.Pair, error) {
 	pairID, err := GeneratePairID()
 	if err != nil {
 		log.Println("Error generating pair ID: ", err)
 		return nil, err
 	}
 
-	accessToken, err := generateAccessToken(uInfo.UserIP, uInfo.UserAgent, pairID)
+	accessToken, err := generateAccessToken(uInfo, pairID)
 	if err != nil {
 		log.Println("Error generating access token: ", err)
 		return nil, err
@@ -39,7 +39,10 @@ func GeneratePair(db *postgres.DB, uInfo *models.UserInfo) (*models.Pair, error)
 		PairID:    pairID,
 	}
 
-	db.SaveRefreshToken(rToken)
+	err = db.SaveRefreshToken(rToken)
+	if err != nil {
+		return nil, err
+	}
 
 	pair := &models.Pair{
 		AccessToken:  accessToken,

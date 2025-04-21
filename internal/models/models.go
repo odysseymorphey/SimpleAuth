@@ -3,9 +3,8 @@ package models
 import "github.com/golang-jwt/jwt/v5"
 
 type UserInfo struct {
-	GUID      string
-	UserIP    string
-	UserAgent string
+	GUID   string
+	UserIP string
 }
 
 type Pair struct {
@@ -14,6 +13,7 @@ type Pair struct {
 }
 
 type CustomClaims struct {
+	GUID      string `json:"guid"`
 	IP        string `json:"ip"`
 	UserAgent string `json:"userAgent"`
 	PairID    string `json:"pairID"`

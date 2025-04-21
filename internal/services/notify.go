@@ -1,7 +1,9 @@
 package services
 
-import "log"
+import (
+	"github.com/sirupsen/logrus"
+)
 
 func sendEmailNotification(email string) {
-	log.Println("Email notification sent to: ", email)
+	logrus.Info("Email notification sent to: ", email)
 }

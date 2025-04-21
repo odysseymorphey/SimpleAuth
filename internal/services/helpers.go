@@ -11,8 +11,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	secretKey = []byte("Barbara_with_big_titties")
+const (
+	secretKey = "Barbara_with_big_titties"
 )
 
 func GeneratePairID() (string, error) {
@@ -35,11 +35,11 @@ func generateBCrypt(token string) (string, error) {
 	return string(hashedToken), nil
 }
 
-func generateAccessToken(userIP string, userAgent string, pairID string) (string, error) {
+func generateAccessToken(uInfo *models.UserInfo, pairID string) (string, error) {
 	claims := &models.CustomClaims{
-		IP:        userIP,
-		UserAgent: userAgent,
-		PairID:    pairID,
+		GUID:   uInfo.GUID,
+		IP:     uInfo.UserIP,
+		PairID: pairID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Minute)),
 		},
